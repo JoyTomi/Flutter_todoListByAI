@@ -69,6 +69,39 @@ class _TodoListPageState extends State<TodoListPage> {
   final TodoService _todoService = TodoService();
   final TextEditingController _textController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _editController = TextEditingController();
+
+  void _showEditDialog(Todo todo) {
+    _editController.text = todo.title;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Todo'),
+        content: TextField(
+          controller: _editController,
+          decoration: const InputDecoration(
+            hintText: 'Enter new title',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_editController.text.isNotEmpty) {
+                _todoService.updateTodoTitle(todo.id, _editController.text);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,9 +184,18 @@ class _TodoListPageState extends State<TodoListPage> {
                               : null,
                         ),
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _todoService.deleteTodo(todo.id),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _showEditDialog(todo),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => _todoService.deleteTodo(todo.id),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -169,6 +211,7 @@ class _TodoListPageState extends State<TodoListPage> {
   @override
   void dispose() {
     _textController.dispose();
+    _editController.dispose();
     super.dispose();
   }
 }

@@ -42,6 +42,10 @@ class TodoService {
     await _database.child('todos/${todo.id}').update(todo.toJson());
   }
 
+  Future<void> updateTodoTitle(String id, String newTitle) async {
+    await _database.child('todos/$id').update({'title': newTitle});
+  }
+
   Future<void> deleteTodo(String id) async {
     await _database.child('todos/$id').remove();
   }
